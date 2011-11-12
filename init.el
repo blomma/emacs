@@ -3,7 +3,6 @@
 ;;;
 
 (setq load-path (cons (expand-file-name "~/.emacs.d/lisp") load-path))
-(setq load-path (cons (expand-file-name "~/.emacs.d/lisp/git-emacs") load-path))
 (setq load-path (cons (expand-file-name "~/.emacs.d/lisp/template/lisp") load-path))
 (setq load-path (cons (expand-file-name "~/.emacs.d/theme") load-path))
 
@@ -17,7 +16,7 @@
 
 ;; Start upp a server under linux
 (if (not windows)
-    (server-start))
+	(server-start))
 
 ;;; Language settings
 ;; use UTF-8
@@ -29,7 +28,7 @@
   (set-default-font "-misc-fixed-medium-r-normal--15-140-75-75-c-90-iso8859-1"))
 
 ;; Mac specifik confs
-(when darwin  
+(when darwin
   (set-face-font 'default "Menlo-12")
 
   ;; Set startup frame width
@@ -95,7 +94,7 @@
 (setq default-tab-width 4)
 
 ;; highlight during query
-(setq query-replace-highlight t)        
+(setq query-replace-highlight t)
 
 ;; Automagically read compressed files
 (auto-compression-mode 1)
@@ -119,7 +118,7 @@
 ;;;
 
 (if (boundp 'transient-mark-mode)
-    (setq transient-mark-mode t))
+	(setq transient-mark-mode t))
 (setq mark-even-if-inactive t)
 
 ;;;---------------------------------------------------------------------
@@ -137,9 +136,10 @@
 ;;; Autosave and Backup
 ;;;
 
-(setq auto-save-default t)
+(setq auto-save-default nil)
 (setq auto-save-visited-file-name nil)
 (setq make-backup-files nil)
+(setq backup-inhibited t)
 (setq backup-by-copying-when-linked t)  ; Preserve links!
 
 ;;;---------------------------------------------------------------------
@@ -151,16 +151,24 @@
 ;;; refer to as "military" time...
 
 (setq display-time-day-and-date t
-      display-time-24hr-format t)
+	  display-time-24hr-format t)
 (display-time)
 (line-number-mode t)
 (column-number-mode t)
 
 ;;;-----------------------------------------------------------------------------
-;;; Git mode
+;;; Whitespace mode
 ;;;
 
-(require 'git-emacs)
+(autoload 'nuke-trailing-whitespace "whitespace" nil t)
+(add-hook 'write-file-functions 'nuke-trailing-whitespace)
+
+;;;-----------------------------------------------------------------------------
+;;; Line numbering mode
+;;;
+
+(require 'linum)
+(setq linum-format " %d ")
 
 ;;;-----------------------------------------------------------------------------
 ;;; Textmate mode
@@ -194,7 +202,7 @@
   (turn-on-auto-revert-mode)
   (setq indent-tabs-mode nil)
   )
-    
+
 (add-hook 'vbnet-mode-hook 'my-vbnet-mode-fn)
 
 ;;;-----------------------------------------------------------------------------
@@ -211,17 +219,17 @@
 
 (defface paren-face
   '((((class color))
-     (:foreground "DimGray")))
+	 (:foreground "DimGray")))
   "Face for displaying a paren."
   :group 'faces)
 
 (defmacro paren-face-add-support (keywords)
   "Generate a lambda expression for use in a hook."
   `(lambda ()
-     (let* ((regexp "(\\|)")
-            (match (assoc regexp ,keywords)))
-       (unless (eq (cdr match) paren-face)
-         (setq ,keywords (append (list (cons regexp paren-face)) ,keywords))))))
+	 (let* ((regexp "(\\|)")
+			(match (assoc regexp ,keywords)))
+	   (unless (eq (cdr match) paren-face)
+		 (setq ,keywords (append (list (cons regexp paren-face)) ,keywords))))))
 
 ;; Keep the compiler quiet.
 (eval-when-compile
@@ -239,8 +247,8 @@
 ;;;
 
 (autoload 'css-mode "css-mode")
-(setq auto-mode-alist       
-      (cons '("\\.css\\'" . css-mode) auto-mode-alist))
+(setq auto-mode-alist
+	  (cons '("\\.css\\'" . css-mode) auto-mode-alist))
 
 (setq cssm-indent-function #'cssm-c-style-indenter)
 (setq cssm-indent-level 4)
@@ -278,10 +286,10 @@
 (setq cperl-extra-newline-before-brace t)
 
 (setq auto-mode-alist
-      (append '(("\\.\\([pP][Llm]\\|al\\)$" . perl-mode))  auto-mode-alist ))
+	  (append '(("\\.\\([pP][Llm]\\|al\\)$" . perl-mode))  auto-mode-alist ))
 
 (setq auto-mode-alist (append (list (cons "\\.cgi\\'" 'perl-mode))
-                              auto-mode-alist))
+							  auto-mode-alist))
 
 ;;;----------------------------------------------------------------------
 ;;;  C/C++ mode
@@ -289,24 +297,24 @@
 
 (defconst my-c-style
   '((c-basic-offset . 4)
-    (c-comment-only-line-offset . 0)
-    (c-hanging-braces-alist . (
+	(c-comment-only-line-offset . 0)
+	(c-hanging-braces-alist . (
 							   (substatement-open before after)
 							   (brace-list-open before after)
-                               (defun-open)
-                               (defun-close)
+							   (defun-open)
+							   (defun-close)
 							   ))
-    (c-offsets-alist . (
+	(c-offsets-alist . (
 						(topmost-intro        . 0)
-                        (topmost-intro-cont   . *)
-                        (substatement         . +)
-                        (substatement-open    . 0)
-                        (case-label           . +)
-                        (access-label         . /)
-                        (inclass              . +)
-                        (inline-open          . 0)
-                        (arglist-close        . 0)
-                        ))
+						(topmost-intro-cont   . *)
+						(substatement         . +)
+						(substatement-open    . 0)
+						(case-label           . +)
+						(access-label         . /)
+						(inclass              . +)
+						(inline-open          . 0)
+						(arglist-close        . 0)
+						))
 	(setq c-echo-syntactic-information-p t)
 	)
   "My C/C++ Programming Style")
@@ -314,7 +322,7 @@
 (defun my-c-mode-common-hook ()
   ;; add my personal style and set it for the current buffer
   (c-add-style "PERSONAL" my-c-style t)
-  
+
   ;; Define some stuff to font lock
   (font-lock-add-keywords 'c-mode '(("\\<FIXME:" 0 font-lock-warning-face t)))
   (font-lock-add-keywords 'c++-mode '(("\\<FIXME:" 0 font-lock-warning-face t)))
@@ -343,59 +351,59 @@
 (autoload 'csharp-mode "csharp-mode")
 
 (c-add-style "myC#Style"
-             '(
-               (c-basic-offset . 4)
-               (c-comment-only-line-offset . 0)
-               (c-hanging-braces-alist . (
-                                          (substatement-open before after)
-                                          (brace-list-open before after)
-                                          (defun-open)
-                                          (defun-close)
-                                          ))
+			 '(
+			   (c-basic-offset . 4)
+			   (c-comment-only-line-offset . 0)
+			   (c-hanging-braces-alist . (
+										  (substatement-open before after)
+										  (brace-list-open before after)
+										  (defun-open)
+										  (defun-close)
+										  ))
 
-               (c-offsets-alist . (
-                                   (topmost-intro        . 0)
-                                   (topmost-intro-cont   . *)
-                                   (substatement         . +)
-                                   (substatement-open    . 0)
-                                   (case-label           . +)
-                                   (access-label         . 0)
-                                   (inclass              . +)
-                                   (inline-open          . 0)
-                                   (arglist-close        . 0)
-                                   (innamespace          . +)
-                                   ))
-               ))
+			   (c-offsets-alist . (
+								   (topmost-intro        . 0)
+								   (topmost-intro-cont   . *)
+								   (substatement         . +)
+								   (substatement-open    . 0)
+								   (case-label           . +)
+								   (access-label         . 0)
+								   (inclass              . +)
+								   (inline-open          . 0)
+								   (arglist-close        . 0)
+								   (innamespace          . +)
+								   ))
+			   ))
 
 (defun my-csharp-mode-hook ()
   (cond (window-system
-         (turn-on-font-lock)
-         (c-set-style "myC#Style")
-         )))
+		 (turn-on-font-lock)
+		 (c-set-style "myC#Style")
+		 )))
 
 (add-hook 'csharp-mode-hook 'my-csharp-mode-hook)
 (setq auto-mode-alist
-      (append '(
-                ("\\.cs$" . csharp-mode)
-                ) auto-mode-alist ))
+	  (append '(
+				("\\.cs$" . csharp-mode)
+				) auto-mode-alist ))
 
 ;;;-----------------------------------------------------------------------------
 ;;; Key bindings
 ;;;
 
-(global-set-key [f1] 'goto-line) 
+(global-set-key [f1] 'goto-line)
 (global-set-key [(shift f1)] 'view-emacs-FAQ)
-(global-set-key [f2] 'comment-region) 
+(global-set-key [f2] 'comment-region)
 (global-set-key [(shift f2)] 'uncomment-region)
-(global-set-key [f3] 'shell) 
+(global-set-key [f3] 'shell)
 (global-set-key [f4] 'indent-region)
-(global-set-key [(shift f4)] 'wrap-all-lines) 
+(global-set-key [(shift f4)] 'wrap-all-lines)
 (global-set-key [f5] 'bury-buffer)
 (global-set-key [(shift f5)] 'list-colors-display)
 (global-set-key [f7] 'imenu)
 (global-set-key [(shift f7)] 'insert-perl-die)
-(global-set-key [f8] 'run-perl) 
-(global-set-key [(shift f8)] 'debug-perl) 
+(global-set-key [f8] 'run-perl)
+(global-set-key [(shift f8)] 'debug-perl)
 (global-set-key [f9] 'split-window-vertically)
 (global-set-key [f11] 'query-replace)
 
@@ -412,10 +420,10 @@
 ;;;
 
 (custom-set-variables
-  ;; custom-set-variables was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(column-number-mode t)
  '(confirm-kill-emacs nil)
  '(cperl-brace-imaginary-offset 0)
@@ -426,6 +434,7 @@
  '(cperl-invalid-face nil)
  '(cperl-under-as-char t)
  '(delete-selection-mode t nil (delsel))
+ '(global-linum-mode t)
  '(paren-ding-unmatched nil)
  '(paren-display-message (quote only))
  '(paren-dont-load-timer nil)
@@ -456,12 +465,12 @@
 print a message in the minibuffer with the result."
   (interactive)
   (save-excursion
-    (let ((count 0))
-      (goto-char (point-min))
-      (while (< (point) (point-max))
-        (forward-word 1)
-        (setq count (1+ count)))
-      (message "buffer contains %d words." count))))
+	(let ((count 0))
+	  (goto-char (point-min))
+	  (while (< (point) (point-max))
+		(forward-word 1)
+		(setq count (1+ count)))
+	  (message "buffer contains %d words." count))))
 
 ;; insert date into buffer
 (defun insert-date ()
@@ -487,29 +496,29 @@ print a message in the minibuffer with the result."
   (pop-to-buffer "*Fortune*")
   (insert (shell-command-to-string "/Users/blomma/Opt/homebrew/bin/fortune")))
 
-;; This method, when bound to C-x C-c, allows you to close an emacs frame the 
+;; This method, when bound to C-x C-c, allows you to close an emacs frame the
 ;; same way, whether it's the sole window you have open, or whether it's
 ;; a "child" frame of a "parent" frame.  If you're like me, and use emacs in
 ;; a windowing environment, you probably have lots of frames open at any given
 ;; time.  Well, it's a pain to remember to do Ctrl-x 5 0 to dispose of a child
 ;; frame, and to remember to do C-x C-x to close the main frame (and if you're
 ;; not careful, doing so will take all the child frames away with it).  This
-;; is my solution to that: an intelligent close-frame operation that works in 
+;; is my solution to that: an intelligent close-frame operation that works in
 ;; all cases (even in an emacs -nw session).
 (defun intelligent-close ()
   "quit a frame the same way no matter what kind of frame you are on"
   (interactive)
   (if (eq (car (visible-frame-list)) (selected-frame))
-      ;;for parent/master frame...
-      (if (> (length (visible-frame-list)) 1)
-          ;;close a parent with children present
-          (delete-frame (selected-frame))
-        ;;close a parent with no children present
-        (save-buffers-kill-emacs))
-    ;;close a child frame
-    (delete-frame (selected-frame))))
+	  ;;for parent/master frame...
+	  (if (> (length (visible-frame-list)) 1)
+		  ;;close a parent with children present
+		  (delete-frame (selected-frame))
+		;;close a parent with no children present
+		(save-buffers-kill-emacs))
+	;;close a child frame
+	(delete-frame (selected-frame))))
 
-;;compute the length of the marked region 
+;;compute the length of the marked region
 (defun region-length ()
   "length of a region"
   (interactive)
@@ -518,13 +527,13 @@ print a message in the minibuffer with the result."
 ;; Kill other window and and enlarge current buffer
 (defun kill-buffer-other-window (arg)
   "Kill the buffer in the other window, and make the current buffer full size. If no
-      other window, kills current buffer."
+	  other window, kills current buffer."
   (interactive "p")
   (let ((buf (save-window-excursion
-               (other-window arg)
-               (current-buffer))))
-    (delete-windows-on buf)
-    (kill-buffer buf)))
+			   (other-window arg)
+			   (current-buffer))))
+	(delete-windows-on buf)
+	(kill-buffer buf)))
 
 ;; Insert // header
 (defun insert-header ()
@@ -540,10 +549,10 @@ print a message in the minibuffer with the result."
 		   )))
 
 (custom-set-faces
-  ;; custom-set-faces was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(diff-added-face ((t (:foreground "DarkGreen"))) t)
  '(diff-changed-face ((t (:foreground "MediumBlue"))) t)
  '(diff-context-face ((t (:foreground "Black"))) t)
@@ -559,3 +568,5 @@ print a message in the minibuffer with the result."
 ;;;
 
 (require 'ido)
+(ido-mode t)
+(setq ido-enable-flex-matching t)
