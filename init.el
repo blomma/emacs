@@ -4,7 +4,7 @@
 
 (setq load-path (cons (expand-file-name "~/.emacs.d/lisp") load-path))
 (setq load-path (cons (expand-file-name "~/.emacs.d/lisp/template/lisp") load-path))
-(setq load-path (cons (expand-file-name "~/.emacs.d/theme") load-path))
+(setq load-path (cons (expand-file-name "~/.emacs.d/themes") load-path))
 
 ;;;-----------------------------------------------------------------------------
 ;;; Misc
@@ -393,8 +393,6 @@
 
 (global-set-key [f1] 'goto-line)
 (global-set-key [(shift f1)] 'view-emacs-FAQ)
-(global-set-key [f2] 'comment-region)
-(global-set-key [(shift f2)] 'uncomment-region)
 (global-set-key [f3] 'shell)
 (global-set-key [f4] 'indent-region)
 (global-set-key [(shift f4)] 'wrap-all-lines)
@@ -408,7 +406,7 @@
 (global-set-key [f11] 'query-replace)
 
 ;; Goto a specific line is really needed!
-(global-set-key "\M-g" 'goto-line)
+(global-set-key "\C-l" 'goto-line)
 
 (global-set-key "\C-xs" 'save-buffer)
 
@@ -452,12 +450,44 @@
 ;;;  Color Theme
 ;;;
 
-(require 'color-theme-blomma)
-(color-theme-blomma)
+(require 'color-theme)
+(color-theme-initialize)
+(load-file "~/.emacs.d/themes/color-theme-twilight.el")
+(color-theme-twilight)
 
 ;;;---------------------------------------------------------------------
 ;;; Misc functions
 ;;;
+
+;; narrower window, better line wrapping for prose
+(defun write-words ()
+  (interactive)
+  (set-frame-width nil 90)
+  (global-visual-line-mode t)
+  (setq mode-line-format nil)
+  (show-paren-mode nil))
+
+;; widescreen, no line-wrap
+(defun write-code ()
+  (interactive)
+  ;;(set-frame-width nil 320)
+  (set-frame-height nil 95)
+  (global-visual-line-mode 0)
+  (show-paren-mode)
+  (setq mode-line-format
+		(list "-"
+			  'mode-line-mule-info
+			  'mode-line-modified
+			  'mode-line-frame-identification
+			  'mode-line-buffer-identification
+			  "   "
+			  'mode-line-position
+			  '(vc-mode vc-mode)
+			  "   "
+			  'mode-line-modes
+			  '(which-func-mode ("" which-func-format))
+			  '(global-mode-string (global-mode-string))
+			  )))
 
 ;; Count words in buffer
 (defun count-words-buffer ()

@@ -1,27 +1,15 @@
-;;; color-theme-blomma.el --- 
-
-;; Copyright 2011 Mikael Hultgren
+;; Blomma Colour Theme for Emacs.
 ;;
-;; Author: Mikael Hultgren <blomma@gmail.com>
-;; Version: $Id: color-theme-blomma.el,v 0.0 2011/11/12 16:23:57 blomma Exp $
-;; Keywords: 
-;; X-URL: not distributed yet
-
-;; This program is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; (require 'color-theme)
+;; (color-theme-initialize)
+;; (load-file "~/.emacs.d/themes/color-theme-blomma.el")
 ;;
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
+;; And then (color-theme-blomma) to activate it.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with this program; if not, write to the Free Software
-;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-(require 'color-theme)
+;; MIT License Copyright (c) 2008 JD Huntington <jdhuntington at gmail dot com>
+;; Credits due to the excellent TextMate Blackboard theme
+;;
+;; All patches welcome
 
 (defun color-theme-blomma ()
   "Color theme for blomma's funk"
@@ -92,6 +80,6 @@
 	 (todoo-item-header-face ((t (:foreground "lightsteelblue3" :weight bold))))
 )))
 
-(provide 'color-theme-blomma)
+;;(provide 'color-theme-blomma)
 
 ;;; color-theme-blomma.el ends here
