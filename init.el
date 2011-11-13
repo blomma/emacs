@@ -3,7 +3,6 @@
 ;;;
 
 (setq load-path (cons (expand-file-name "~/.emacs.d/lisp") load-path))
-(setq load-path (cons (expand-file-name "~/.emacs.d/lisp/template/lisp") load-path))
 (setq load-path (cons (expand-file-name "~/.emacs.d/themes") load-path))
 
 ;;;-----------------------------------------------------------------------------
@@ -37,7 +36,7 @@
 
   (setq browse-url-browser-function 'browse-url-default-macosx-browser
 		delete-by-moving-to-trash t)
-)
+  )
 
 
 ;;;-----------------------------------------------------------------------------
@@ -159,6 +158,7 @@
 ;;;-----------------------------------------------------------------------------
 ;;; Markdown mode
 ;;;
+
 (autoload 'markdown-mode "markdown-mode"
   "Major mode for editing Markdown files" t)
 (setq auto-mode-alist
@@ -262,17 +262,27 @@
 (setq cssm-indent-level 4)
 
 ;;;-----------------------------------------------------------------------------
-;;; Template mode
-;;;
-
-(require 'template)
-(template-initialize)
-
-;;;-----------------------------------------------------------------------------
 ;;; Filladapt
 ;;;
 
 (require 'filladapt)
+
+;;;-----------------------------------------------------------------------------
+;;; Buffer switching
+;;;
+
+(require 'ido)
+(ido-mode t)
+(setq ido-enable-flex-matching t)
+
+;;;----------------------------------------------------------------------
+;;;  Color Theme
+;;;
+
+(require 'color-theme)
+(color-theme-initialize)
+(load-file "~/.emacs.d/themes/color-theme-twilight.el")
+(color-theme-twilight)
 
 ;;;-----------------------------------------------------------------------------
 ;;; CPerl mode
@@ -446,22 +456,10 @@
  '(paren-dont-load-timer nil)
  '(paren-sexp-mode nil)
  '(show-paren-mode nil)
- '(template-auto-insert t)
- '(template-initialize t)
- '(template-subdirectories (quote ("~/.emacs.d/templates/" "Templates/")))
  '(tool-bar-mode nil nil (tool-bar))
  '(transient-mark-mode t)
  '(user-mail-address "Mikael Hultgren <blomma@gmail.com>")
-)
-
-;;;----------------------------------------------------------------------
-;;;  Color Theme
-;;;
-
-(require 'color-theme)
-(color-theme-initialize)
-(load-file "~/.emacs.d/themes/color-theme-twilight.el")
-(color-theme-twilight)
+ )
 
 ;;;---------------------------------------------------------------------
 ;;; Misc functions
@@ -600,11 +598,3 @@ print a message in the minibuffer with the result."
  '(diff-index-face ((t (:foreground "Green"))) t)
  '(diff-nonexistent-face ((t (:foreground "DarkBlue"))) t)
  '(diff-removed-face ((t (:foreground "DarkMagenta"))) t))
-
-;;;-----------------------------------------------------------------------------
-;;; Buffer switching
-;;;
-
-(require 'ido)
-(ido-mode t)
-(setq ido-enable-flex-matching t)
