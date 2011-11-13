@@ -28,11 +28,11 @@
 
 ;; Mac specifik confs
 (when darwin
-  (set-face-font 'default "Menlo-12")
+  (set-face-font 'default "Menlo-13")
 
   ;; Set startup frame width
   (setq default-frame-alist
-		'((top . 1) (left . 1) (width . 126) (height . 42)))
+  		'((top . 90) (left . 90) (width . 126) (height . 42)))
 
   (setq browse-url-browser-function 'browse-url-default-macosx-browser
 		delete-by-moving-to-trash t)
@@ -172,13 +172,6 @@
 (add-hook 'write-file-functions 'nuke-trailing-whitespace)
 
 ;;;-----------------------------------------------------------------------------
-;;; Line numbering mode
-;;;
-
-(require 'linum)
-(setq linum-format " %d ")
-
-;;;-----------------------------------------------------------------------------
 ;;; Textmate mode
 ;;;
 
@@ -302,6 +295,13 @@
 (setq cperl-continued-statement-offset 4)
 (setq cperl-merge-trailing-else nil)
 (setq cperl-extra-newline-before-brace t)
+(setq cperl-brace-imaginary-offset 0)
+(setq cperl-close-paren-offset -4)
+(setq cperl-continued-brace-offset 0)
+(setq cperl-highlight-variables-indiscriminately nil)
+(setq cperl-indent-parens-as-block t)
+(setq cperl-invalid-face nil)
+(setq cperl-under-as-char t)
 
 (setq auto-mode-alist
 	  (append '(("\\.\\([pP][Llm]\\|al\\)$" . perl-mode))  auto-mode-alist ))
@@ -409,7 +409,6 @@
 ;;; Key bindings
 ;;;
 
-(global-set-key [f1] 'goto-line)
 (global-set-key [(shift f1)] 'view-emacs-FAQ)
 (global-set-key [f3] 'shell)
 (global-set-key [f4] 'indent-region)
@@ -442,22 +441,12 @@
  ;; If there is more than one, they won't work right.
  '(column-number-mode t)
  '(confirm-kill-emacs nil)
- '(cperl-brace-imaginary-offset 0)
- '(cperl-close-paren-offset -4)
- '(cperl-continued-brace-offset 0 t)
- '(cperl-highlight-variables-indiscriminately nil)
- '(cperl-indent-parens-as-block t)
- '(cperl-invalid-face nil)
- '(cperl-under-as-char t)
  '(delete-selection-mode t nil (delsel))
- '(global-linum-mode t)
  '(paren-ding-unmatched nil)
  '(paren-display-message (quote only))
  '(paren-dont-load-timer nil)
  '(paren-sexp-mode nil)
  '(show-paren-mode nil)
- '(tool-bar-mode nil nil (tool-bar))
- '(transient-mark-mode t)
  '(user-mail-address "Mikael Hultgren <blomma@gmail.com>")
  )
 
@@ -583,18 +572,3 @@ print a message in the minibuffer with the result."
 		   " by " (user-full-name) "\n//\n"
 		   "// Author: " (user-full-name) "\n//\n"
 		   )))
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(diff-added-face ((t (:foreground "DarkGreen"))) t)
- '(diff-changed-face ((t (:foreground "MediumBlue"))) t)
- '(diff-context-face ((t (:foreground "Black"))) t)
- '(diff-file-header-face ((t (:foreground "Red" :background "White"))) t)
- '(diff-header-face ((t (:foreground "Red"))) t)
- '(diff-hunk-header-face ((t (:foreground "White" :background "Salmon"))) t)
- '(diff-index-face ((t (:foreground "Green"))) t)
- '(diff-nonexistent-face ((t (:foreground "DarkBlue"))) t)
- '(diff-removed-face ((t (:foreground "DarkMagenta"))) t))
