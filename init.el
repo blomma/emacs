@@ -2,8 +2,8 @@
 ;;; Set the load path
 ;;;
 
-(setq load-path (cons (expand-file-name "~/.emacs.d/lisp") load-path))
-(setq load-path (cons (expand-file-name "~/.emacs.d/themes") load-path))
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp"))
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp/themes"))
 
 ;;;-----------------------------------------------------------------------------
 ;;; Misc
@@ -43,17 +43,28 @@
 ;;; Internal emacs variables
 ;;;
 
-;; Turn off cursor blinking
-(blink-cursor-mode -1)
-
-;; Turn off toolbar
-(tool-bar-mode -1)
-
-;; Turn off tooltips
-(tooltip-mode -1)
-
-;; Disable the scrollbar
-(scroll-bar-mode -1)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(blink-cursor-mode nil)
+ '(column-number-mode t)
+ '(confirm-kill-emacs nil)
+ '(current-language-environment "UTF-8")
+ '(delete-selection-mode t nil (delsel))
+ '(paren-ding-unmatched nil)
+ '(paren-display-message (quote only))
+ '(paren-dont-load-timer nil)
+ '(paren-sexp-mode nil)
+ '(save-place t nil (saveplace))
+ '(scroll-bar-mode nil)
+ '(show-paren-mode t)
+ '(size-indication-mode t)
+ '(tool-bar-mode nil)
+ '(tooltip-mode nil)
+ '(uniquify-buffer-name-style (quote forward) nil (uniquify))
+ '(user-mail-address "Mikael Hultgren <blomma@gmail.com>"))
 
 ;; Mouse focus follow
 (setq mouse-autoselect-window t)
@@ -214,6 +225,10 @@
 (add-to-list 'auto-mode-alist '("\\.lua$" . lua-mode))
 (add-to-list 'interpreter-mode-alist '("lua" . lua-mode))
 
+;;;-----------------------------------------------------------------------------
+;;; Lisp modes
+;;;
+
 ;;; Tone down parens in lisp modes
 
 (defvar paren-face 'paren-face)
@@ -274,7 +289,7 @@
 
 (require 'color-theme)
 (color-theme-initialize)
-(load-file "~/.emacs.d/themes/color-theme-twilight.el")
+(load-file "~/.emacs.d/lisp/themes/color-theme-twilight.el")
 (color-theme-twilight)
 
 ;;;-----------------------------------------------------------------------------
@@ -430,26 +445,6 @@
 ;; Revert buffer
 (global-set-key [(control c) r] 'revert-buffer)
 
-;;;----------------------------------------------------------------------
-;;;  Custom var
-;;;
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(column-number-mode t)
- '(confirm-kill-emacs nil)
- '(delete-selection-mode t nil (delsel))
- '(paren-ding-unmatched nil)
- '(paren-display-message (quote only))
- '(paren-dont-load-timer nil)
- '(paren-sexp-mode nil)
- '(show-paren-mode nil)
- '(user-mail-address "Mikael Hultgren <blomma@gmail.com>")
- )
-
 ;;;---------------------------------------------------------------------
 ;;; Misc functions
 ;;;
@@ -572,3 +567,9 @@ print a message in the minibuffer with the result."
 		   " by " (user-full-name) "\n//\n"
 		   "// Author: " (user-full-name) "\n//\n"
 		   )))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
