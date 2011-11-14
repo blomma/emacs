@@ -15,7 +15,7 @@
 
 ;; Start upp a server under linux
 (if (not windows)
-	(server-start))
+    (server-start))
 
 ;;; Language settings
 ;; use UTF-8
@@ -32,10 +32,10 @@
 
   ;; Set startup frame width
   (setq default-frame-alist
-  		'((top . 90) (left . 90) (width . 126) (height . 42)))
+        '((top . 90) (left . 90) (width . 126) (height . 42)))
 
   (setq browse-url-browser-function 'browse-url-default-macosx-browser
-		delete-by-moving-to-trash t)
+        delete-by-moving-to-trash t)
   )
 
 
@@ -76,8 +76,8 @@
 ;; change default major mode to text from fundamental
 (setq default-major-mode 'text-mode)
 
-;; Set to insert tabs instead of space
-(setq-default indent-tabs-mode t)
+;; Set to insert spaces instead of tabs
+(setq-default indent-tabs-mode nil)
 
 ;; don't automatically add new lines when scrolling down at the bottom
 ;; of a buffer
@@ -128,7 +128,7 @@
 ;;;
 
 (if (boundp 'transient-mark-mode)
-	(setq transient-mark-mode t))
+    (setq transient-mark-mode t))
 (setq mark-even-if-inactive t)
 
 ;;;---------------------------------------------------------------------
@@ -161,10 +161,51 @@
 ;;; refer to as "military" time...
 
 (setq display-time-day-and-date t
-	  display-time-24hr-format t)
+      display-time-24hr-format t)
 (display-time)
 (line-number-mode t)
 (column-number-mode t)
+
+;;;-----------------------------------------------------------------------------
+;;; Javascript mode
+;;;
+
+(defvar esk-js-mode-hook nil)
+(defun run-esk-js-mode-hook ()
+  (run-hooks 'esk-js-mode-hook))
+
+(defmacro esk-configure-javascript (name)
+  (let ((sym (intern name))
+        (mode (intern (concat name "-mode")))
+        (hook (intern (concat name "-mode-hook")))
+        (keymap (intern (concat name "-mode-map")))
+        (indent (intern (concat name "-indent-level"))))
+    `(progn
+       (autoload ',mode ,name ,(concat "Start " name "-mode") t)
+       (add-to-list 'auto-mode-alist '("\\.js$" . ,mode))
+       (add-to-list 'auto-mode-alist '("\\.json$" . ,mode))
+       (add-hook ',hook 'moz-minor-mode)
+       (add-hook ',hook 'esk-paredit-nonlisp)
+       (add-hook ',hook 'run-coding-hook)
+       (add-hook ',hook 'run-esk-js-mode-hook)
+       (setq ,indent 4)
+
+       (eval-after-load ',sym
+         '(progn (define-key ,keymap "{" 'paredit-open-curly)
+                 (define-key ,keymap "}" 'paredit-close-curly-and-newline)
+                 (define-key ,keymap (kbd ",") 'self-insert-command))))))
+
+(defun pretty-functions ()
+  (font-lock-add-keywords
+   nil `(("\\(function *\\)("
+          (0 (progn (compose-region (match-beginning 1)
+                                    (match-end 1) "ƒ")
+                    nil))))))
+(add-hook 'esk-js-mode-hook 'pretty-functions)
+
+(if (< (string-to-number emacs-version) 23.2)
+    (esk-configure-javascript "espresso")
+  (esk-configure-javascript "js"))
 
 ;;;-----------------------------------------------------------------------------
 ;;; Markdown mode
@@ -173,14 +214,29 @@
 (autoload 'markdown-mode "markdown-mode"
   "Major mode for editing Markdown files" t)
 (setq auto-mode-alist
-	  (cons '("\\.md" . markdown-mode) auto-mode-alist))
+      (cons '("\\.md" . markdown-mode) auto-mode-alist))
+
+;;;-----------------------------------------------------------------------------
+;;; Smarttab mode
+;;;
+
+(require 'smart-tab)
+(global-smart-tab-mode 1)
+
+(define-key read-expression-map [(tab)] 'hippie-expand)
+
+(defun hippie-unexpand ()
+  (interactive)
+  (hippie-expand 0))
+
+(define-key read-expression-map [(shift tab)] 'hippie-unexpand)
 
 ;;;-----------------------------------------------------------------------------
 ;;; Whitespace mode
 ;;;
 
-(autoload 'nuke-trailing-whitespace "whitespace" nil t)
-(add-hook 'write-file-functions 'nuke-trailing-whitespace)
+(require 'ethan-wspace)
+(global-ethan-wspace-mode 1)
 
 ;;;-----------------------------------------------------------------------------
 ;;; Textmate mode
@@ -202,7 +258,7 @@
 
 (autoload 'vbnet-mode "vbnet-mode" "Mode for editing VB.NET code." t)
 (setq auto-mode-alist (append '(("\\.\\(frm\\|bas\\|cls\\|vb\\)$" .
-								 vbnet-mode)) auto-mode-alist))
+                                 vbnet-mode)) auto-mode-alist))
 
 (defun my-vbnet-mode-fn ()
   "My hook for VB.NET mode"
@@ -235,17 +291,17 @@
 
 (defface paren-face
   '((((class color))
-	 (:foreground "DimGray")))
+     (:foreground "DimGray")))
   "Face for displaying a paren."
   :group 'faces)
 
 (defmacro paren-face-add-support (keywords)
   "Generate a lambda expression for use in a hook."
   `(lambda ()
-	 (let* ((regexp "(\\|)")
-			(match (assoc regexp ,keywords)))
-	   (unless (eq (cdr match) paren-face)
-		 (setq ,keywords (append (list (cons regexp paren-face)) ,keywords))))))
+     (let* ((regexp "(\\|)")
+            (match (assoc regexp ,keywords)))
+       (unless (eq (cdr match) paren-face)
+         (setq ,keywords (append (list (cons regexp paren-face)) ,keywords))))))
 
 ;; Keep the compiler quiet.
 (eval-when-compile
@@ -264,7 +320,7 @@
 
 (autoload 'css-mode "css-mode")
 (setq auto-mode-alist
-	  (cons '("\\.css\\'" . css-mode) auto-mode-alist))
+      (cons '("\\.css\\'" . css-mode) auto-mode-alist))
 
 (setq cssm-indent-function #'cssm-c-style-indenter)
 (setq cssm-indent-level 4)
@@ -319,10 +375,10 @@
 (setq cperl-under-as-char t)
 
 (setq auto-mode-alist
-	  (append '(("\\.\\([pP][Llm]\\|al\\)$" . perl-mode))  auto-mode-alist ))
+      (append '(("\\.\\([pP][Llm]\\|al\\)$" . perl-mode))  auto-mode-alist ))
 
 (setq auto-mode-alist (append (list (cons "\\.cgi\\'" 'perl-mode))
-							  auto-mode-alist))
+                              auto-mode-alist))
 
 ;;;----------------------------------------------------------------------
 ;;;  C/C++ mode
@@ -330,26 +386,26 @@
 
 (defconst my-c-style
   '((c-basic-offset . 4)
-	(c-comment-only-line-offset . 0)
-	(c-hanging-braces-alist . (
-							   (substatement-open before after)
-							   (brace-list-open before after)
-							   (defun-open)
-							   (defun-close)
-							   ))
-	(c-offsets-alist . (
-						(topmost-intro        . 0)
-						(topmost-intro-cont   . *)
-						(substatement         . +)
-						(substatement-open    . 0)
-						(case-label           . +)
-						(access-label         . /)
-						(inclass              . +)
-						(inline-open          . 0)
-						(arglist-close        . 0)
-						))
-	(setq c-echo-syntactic-information-p t)
-	)
+    (c-comment-only-line-offset . 0)
+    (c-hanging-braces-alist . (
+                               (substatement-open before after)
+                               (brace-list-open before after)
+                               (defun-open)
+                               (defun-close)
+                               ))
+    (c-offsets-alist . (
+                        (topmost-intro        . 0)
+                        (topmost-intro-cont   . *)
+                        (substatement         . +)
+                        (substatement-open    . 0)
+                        (case-label           . +)
+                        (access-label         . /)
+                        (inclass              . +)
+                        (inline-open          . 0)
+                        (arglist-close        . 0)
+                        ))
+    (setq c-echo-syntactic-information-p t)
+    )
   "My C/C++ Programming Style")
 
 (defun my-c-mode-common-hook ()
@@ -384,41 +440,41 @@
 (autoload 'csharp-mode "csharp-mode")
 
 (c-add-style "myC#Style"
-			 '(
-			   (c-basic-offset . 4)
-			   (c-comment-only-line-offset . 0)
-			   (c-hanging-braces-alist . (
-										  (substatement-open before after)
-										  (brace-list-open before after)
-										  (defun-open)
-										  (defun-close)
-										  ))
+             '(
+               (c-basic-offset . 4)
+               (c-comment-only-line-offset . 0)
+               (c-hanging-braces-alist . (
+                                          (substatement-open before after)
+                                          (brace-list-open before after)
+                                          (defun-open)
+                                          (defun-close)
+                                          ))
 
-			   (c-offsets-alist . (
-								   (topmost-intro        . 0)
-								   (topmost-intro-cont   . *)
-								   (substatement         . +)
-								   (substatement-open    . 0)
-								   (case-label           . +)
-								   (access-label         . 0)
-								   (inclass              . +)
-								   (inline-open          . 0)
-								   (arglist-close        . 0)
-								   (innamespace          . +)
-								   ))
-			   ))
+               (c-offsets-alist . (
+                                   (topmost-intro        . 0)
+                                   (topmost-intro-cont   . *)
+                                   (substatement         . +)
+                                   (substatement-open    . 0)
+                                   (case-label           . +)
+                                   (access-label         . 0)
+                                   (inclass              . +)
+                                   (inline-open          . 0)
+                                   (arglist-close        . 0)
+                                   (innamespace          . +)
+                                   ))
+               ))
 
 (defun my-csharp-mode-hook ()
   (cond (window-system
-		 (turn-on-font-lock)
-		 (c-set-style "myC#Style")
-		 )))
+         (turn-on-font-lock)
+         (c-set-style "myC#Style")
+         )))
 
 (add-hook 'csharp-mode-hook 'my-csharp-mode-hook)
 (setq auto-mode-alist
-	  (append '(
-				("\\.cs$" . csharp-mode)
-				) auto-mode-alist ))
+      (append '(
+                ("\\.cs$" . csharp-mode)
+                ) auto-mode-alist ))
 
 ;;;-----------------------------------------------------------------------------
 ;;; Key bindings
@@ -465,19 +521,19 @@
   (global-visual-line-mode 0)
   (show-paren-mode)
   (setq mode-line-format
-		(list "-"
-			  'mode-line-mule-info
-			  'mode-line-modified
-			  'mode-line-frame-identification
-			  'mode-line-buffer-identification
-			  "   "
-			  'mode-line-position
-			  '(vc-mode vc-mode)
-			  "   "
-			  'mode-line-modes
-			  '(which-func-mode ("" which-func-format))
-			  '(global-mode-string (global-mode-string))
-			  )))
+        (list "-"
+              'mode-line-mule-info
+              'mode-line-modified
+              'mode-line-frame-identification
+              'mode-line-buffer-identification
+              "   "
+              'mode-line-position
+              '(vc-mode vc-mode)
+              "   "
+              'mode-line-modes
+              '(which-func-mode ("" which-func-format))
+              '(global-mode-string (global-mode-string))
+              )))
 
 ;; Count words in buffer
 (defun count-words-buffer ()
@@ -485,12 +541,12 @@
 print a message in the minibuffer with the result."
   (interactive)
   (save-excursion
-	(let ((count 0))
-	  (goto-char (point-min))
-	  (while (< (point) (point-max))
-		(forward-word 1)
-		(setq count (1+ count)))
-	  (message "buffer contains %d words." count))))
+    (let ((count 0))
+      (goto-char (point-min))
+      (while (< (point) (point-max))
+        (forward-word 1)
+        (setq count (1+ count)))
+      (message "buffer contains %d words." count))))
 
 ;; insert date into buffer
 (defun insert-date ()
@@ -529,14 +585,14 @@ print a message in the minibuffer with the result."
   "quit a frame the same way no matter what kind of frame you are on"
   (interactive)
   (if (eq (car (visible-frame-list)) (selected-frame))
-	  ;;for parent/master frame...
-	  (if (> (length (visible-frame-list)) 1)
-		  ;;close a parent with children present
-		  (delete-frame (selected-frame))
-		;;close a parent with no children present
-		(save-buffers-kill-emacs))
-	;;close a child frame
-	(delete-frame (selected-frame))))
+      ;;for parent/master frame...
+      (if (> (length (visible-frame-list)) 1)
+          ;;close a parent with children present
+          (delete-frame (selected-frame))
+        ;;close a parent with no children present
+        (save-buffers-kill-emacs))
+    ;;close a child frame
+    (delete-frame (selected-frame))))
 
 ;;compute the length of the marked region
 (defun region-length ()
@@ -546,27 +602,26 @@ print a message in the minibuffer with the result."
 
 ;; Kill other window and and enlarge current buffer
 (defun kill-buffer-other-window (arg)
-  "Kill the buffer in the other window, and make the current buffer full size. If no
-	  other window, kills current buffer."
+  "Kill the buffer in the other window, and make the current buffer full size. If no other window, kills current buffer."
   (interactive "p")
   (let ((buf (save-window-excursion
-			   (other-window arg)
-			   (current-buffer))))
-	(delete-windows-on buf)
-	(kill-buffer buf)))
+               (other-window arg)
+               (current-buffer))))
+    (delete-windows-on buf)
+    (kill-buffer buf)))
 
 ;; Insert // header
 (defun insert-header ()
   "Insert a // header for the current file"
   (interactive)
   (insert (concat
-		   "// File: " (file-name-nondirectory (buffer-file-name)) "\n//\n"
-		   "// Created: " (format-time-string "%Y-%m-%d") "\n"
-		   "// Time-stamp: <>\n"
-		   "// Copyright (C) " (substring( current-time-string) -4 )
-		   " by " (user-full-name) "\n//\n"
-		   "// Author: " (user-full-name) "\n//\n"
-		   )))
+           "// File: " (file-name-nondirectory (buffer-file-name)) "\n//\n"
+           "// Created: " (format-time-string "%Y-%m-%d") "\n"
+           "// Time-stamp: <>\n"
+           "// Copyright (C) " (substring( current-time-string) -4 )
+           " by " (user-full-name) "\n//\n"
+           "// Author: " (user-full-name) "\n//\n"
+           )))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
