@@ -21,7 +21,7 @@
 (add-to-list 'exec-path "~/Opt/homebrew/bin")
 
 ;;;-----------------------------------------------------------------------------
-;;; Misc
+;;; General settings
 ;;;
 
 (setq darwin(eq system-type 'darwin))
@@ -32,11 +32,15 @@
 (if (not windows)
     (server-start))
 
-;;; Language settings
-;; use UTF-8
+;; key board / input method settings
+(setq locale-coding-system 'utf-8)
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
+(set-selection-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
+(set-language-environment "UTF-8")       ; prefer utf-8 for language settings
+(set-input-method nil)                   ; no funky input for normal editing;
+(setq read-quoted-char-radix 10)         ; use decimal, not octal
 
 ;; Mac specifik confs
 (when darwin
@@ -58,31 +62,9 @@
         delete-by-moving-to-trash t)
   )
 
-;;;-----------------------------------------------------------------------------
-;;; Internal emacs variables
-;;;
+(setq user-mail-address "Mikael Hultgren <blomma@gmail.com>")
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(blink-cursor-mode nil)
- '(column-number-mode t)
- '(confirm-kill-emacs nil)
- '(current-language-environment "UTF-8")
- '(delete-selection-mode t nil (delsel))
- '(paren-ding-unmatched nil)
- '(paren-display-message (quote only))
- '(paren-dont-load-timer nil)
- '(paren-sexp-mode nil)
- '(save-place t nil (saveplace))
- '(scroll-bar-mode nil)
- '(show-paren-mode t)
- '(size-indication-mode t)
- '(tool-bar-mode nil)
- '(tooltip-mode nil)
- '(user-mail-address "Mikael Hultgren <blomma@gmail.com>"))
+(setq blink-cursor-mode nil)
 
 ;; put as much syntax highlighting into documents as possible
 (setq font-lock-maximum-decoration t)
@@ -120,11 +102,58 @@
 (setq completion-auto-exit t)
 (setq inhibit-startup-message t)
 
-;; Make buffer names unique.
+;; scrollbar
+(scroll-bar-mode -1)
+
+;; delete seleciton
+(delete-selection-mode 1)
+
+;; goodbye toolbar
+(tool-bar-mode -1)
+
+;; Create a reasonable titlebar for emacs, which works
+;; on both windows and unix.
+;; Note: assumes HOSTNAME is exported.
+(defun create_title_format (user host)
+  "Creates a window title string"
+  (interactive)
+  (list (getenv user) "@" (getenv host) ":"
+        '(:eval
+          (if buffer-file-name
+              (replace-regexp-in-string
+               (getenv "HOME")
+               "~"
+               (buffer-file-name))
+            (buffer-name))))
+  )
+
+;; Set window and icon title.
+(setq frame-title-format
+      (create_title_format "USER" "HOSTNAME"))
+
+;; Display "Don't Panic" in large, friendly, letters
+(setq initial-scratch-message
+      (propertize "Don't\nPanic\n"
+                  'font-lock-face '(:height 10.0 :inherit variable-pitch))
+      inhibit-startup-screen t)
+
+;;;---------------------------------------------------------------------
+;;; Save place
+;;;
+
+(require 'saveplace)
+(setq-default save-place t)
+
+;;;---------------------------------------------------------------------
+;;; Make buffer names unique.
+;;;
+
 (require 'uniquify)
 (setq
  uniquify-buffer-name-style 'reverse
- uniquify-separator ":")
+ uniquify-separator ":"
+ uniquify-after-kill-buffer-p t
+ uniquify-ignore-buffers-re "^\\*")
 
 ;;;---------------------------------------------------------------------
 ;;; Mark handling.  The following two lines makes the highlighted
@@ -150,12 +179,6 @@
 
 (copy-face 'highlight 'isearch)
 
-;; Display "Don't Panic" in large, friendly, letters
-(setq initial-scratch-message
-      (propertize "Don't\nPanic\n"
-                  'font-lock-face '(:height 10.0 :inherit variable-pitch))
-      inhibit-startup-screen t)
-
 ;;;---------------------------------------------------------------------
 ;;; Autosave and Backup
 ;;;
@@ -172,9 +195,69 @@
 
 (setq display-time-day-and-date t
       display-time-24hr-format t)
+
 (display-time)
+
 (line-number-mode t)
+
 (column-number-mode t)
+
+(setq-default mode-line-format
+              (list
+               ;; the buffer name; the file name as a tool tip
+               '(:eval (propertize "%b " 'face 'font-lock-keyword-face
+                                   'help-echo (buffer-file-name)))
+
+               ;; line and column
+               "(" ;; '%02' to set to 2 chars at least; prevents flickering
+               (propertize "%02l" 'face 'font-lock-type-face) ","
+               (propertize "%02c" 'face 'font-lock-type-face)
+               ") "
+
+               ;; relative position, size of file
+               "["
+               (propertize "%p" 'face 'font-lock-constant-face) ;; % above top
+               "/"
+               (propertize "%I" 'face 'font-lock-constant-face) ;; size
+               "] "
+
+               ;; the current major mode for the buffer.
+               "["
+
+               '(:eval (propertize "%m" 'face 'font-lock-string-face
+                                   'help-echo buffer-file-coding-system))
+               "] "
+
+
+               "[" ;; insert vs overwrite mode, input-method in a tooltip
+               '(:eval (propertize (if overwrite-mode "Ovr" "Ins")
+                                   'face 'font-lock-preprocessor-face
+                                   'help-echo (concat "Buffer is in "
+                                                      (if overwrite-mode "overwrite" "insert") " mode")))
+
+               ;; was this buffer modified since the last save?
+               '(:eval (when (buffer-modified-p)
+                         (concat ","  (propertize "Mod"
+                                                  'face 'font-lock-warning-face
+                                                  'help-echo "Buffer has been modified"))))
+
+               ;; is this buffer read-only?
+               '(:eval (when buffer-read-only
+                         (concat ","  (propertize "RO"
+                                                  'face 'font-lock-type-face
+                                                  'help-echo "Buffer is read-only"))))
+               "] "
+
+               ;; add the time, with the date and the emacs uptime in the tooltip
+               '(:eval (propertize (format-time-string "%H:%M")
+                                   'help-echo
+                                   (concat (format-time-string "%c; ")
+                                           (emacs-uptime "Uptime:%hh"))))
+               " --"
+               ;; i don't want to see minor-modes; but if you want, uncomment this:
+               minor-mode-alist  ;; list of minor modes
+               "%-" ;; fill with '-'
+               ))
 
 ;;;-----------------------------------------------------------------------------
 ;;; Markdown mode
@@ -200,18 +283,17 @@
 
 (require 'auto-complete-config)
 
-; Make sure we can find the dictionaries
+;; Make sure we can find the dictionaries
 (add-to-list 'ac-dictionary-directories
              "~/.emacs.d/vendor/auto-complete.el/dict")
 
 (ac-config-default)
-
 (global-auto-complete-mode t)
 
-; Start auto-completion after 2 characters of a word
+;; Start auto-completion after 2 characters of a word
 (setq ac-auto-start 2)
 
-; case sensitivity is important when finding matches
+;; case sensitivity is important when finding matches
 (setq ac-ignore-case nil)
 
 ;;;-----------------------------------------------------------------------------
@@ -220,11 +302,16 @@
 
 (require 'yasnippet)
 (yas/initialize)
-(setq yas/root-directory '("~/.emacs.d/snippets"
-                           "~/.emacs.d/vendor/yasnippet.el/snippets"))
-(mapc 'yas/load-directory yas/root-directory)
+(setq yas/root-directory
+      '("~/.emacs.d/snippets"
+        "~/.emacs.d/vendor/yasnippet.el/snippets"))
 
-;; (add-to-list 'ac-sources 'ac-source-yasnippet)
+(mapc 'yas/load-directory yas/root-directory)
+(setq yes/wrap-around-region t)
+(setq yes/prompt-functions
+      '(yas/x-prompt yas/ido-prompt))
+(yas/global-mode 1)
+(add-to-list 'auto-mode-alist '("yas/.*" . snippet-mode))
 
 ;;;-----------------------------------------------------------------------------
 ;;; Flymake mode
@@ -296,16 +383,25 @@
 ;;;
 
 (require 'ido)
-(ido-mode t)
-
-(defun my-ido-ignore-buffers (name)
-  (with-current-buffer name
-    (string-match "-template-indent-buffer$" name)))
-
-(setq ido-ignore-buffers '(my-ido-ignore-buffers))
+(ido-mode 'both)
 
 ;; fuzzy matching is a must have, says rmm5t
 (setq ido-enable-flex-matching t)
+
+(setq
+ ido-ignore-buffers ;; ignore these guys
+ '("\\` " "^\*Mess" "^\*Back" ".*Completion" "^\*Ido" "^\*trace"
+   "^\*compilation" "^\*GTAGS" "^session\.*" "^\*")
+ ido-work-directory-list '("~/" "~/Desktop" "~/Documents" "~src")
+ ido-case-fold  t                 ;; be case-insensitive
+ ido-enable-last-directory-history t ;; remember last used dirs
+ ido-max-work-directory-list 30   ;; should be enough
+ ido-max-work-file-list      50   ;; remember many
+ ido-use-filename-at-point nil    ;; don't use filename at point (annoying)
+ ido-use-url-at-point nil         ;; don't use url at point (annoying)
+ ido-enable-flex-matching t       ;; fuzzy matching is a must have, says rmm5t
+ ido-max-prospects 8              ;; don't spam my minibuffer
+ ido-confirm-unique-completion t) ;; wait for RET, even with unique completion
 
 ;; Get rid of the annoying .ido.last file
 ;; (http://stackoverflow.com/questions/1371076)
@@ -314,6 +410,9 @@
  ido-record-commands nil
  ido-max-work-directory-list 0
  ido-max-work-file-list 0)
+
+;; when using ido, the confirmation is rather annoying...
+(setq confirm-nonexistent-file-or-buffer nil)
 
 (global-set-key (kbd "C-;") 'ido-switch-buffer)
 
@@ -324,10 +423,17 @@
               " [No match]" " [Matched]" " [Not readable]"
               " [Too big]" " [Confirm]")))
 
-(defun ido-disable-line-trucation ()
-  (set (make-local-variable 'truncate-lines) nil))
+(add-hook 'ido-minibuffer-setup-hook
+          (function
+           (lambda ()
+             (set (make-local-variable 'truncate-lines) nil))))
 
-(add-hook 'ido-minibuffer-setup-hook 'ido-disable-line-trucation)
+;; increase minibuffer size when ido completion is active
+(add-hook 'ido-minibuffer-setup-hook
+          (function
+           (lambda ()
+             (make-local-variable 'resize-minibuffer-window-max-height)
+             (setq resize-minibuffer-window-max-height 1))))
 
 ;;;----------------------------------------------------------------------
 ;;;  Color Theme
@@ -400,11 +506,6 @@
 (global-set-key [f9] 'split-window-vertically)
 (global-set-key [f11] 'query-replace)
 
-;; Goto a specific line is really needed!
-;; (global-set-key "\C-l" 'goto-line)
-
-;; (global-set-key "\C-xs" 'save-buffer)
-
 ;; Revert buffer
 (global-set-key [(control c) r] 'revert-buffer)
 
@@ -418,7 +519,7 @@
   (set-frame-width nil 90)
   (global-visual-line-mode t)
   (setq mode-line-format nil)
-  (show-paren-mode nil))
+  )
 
 ;; widescreen, no line-wrap
 (defun write-code ()
@@ -426,7 +527,6 @@
   (set-frame-width nil 150)
   (set-frame-height nil 40)
   (global-visual-line-mode 0)
-  (show-paren-mode)
   (setq mode-line-format
         (list "-"
               'mode-line-mule-info
@@ -484,19 +584,6 @@ print a message in the minibuffer with the result."
   "length of a region"
   (interactive)
   (message (format "%d" (- (region-end) (region-beginning)))))
-
-;; Insert // header
-(defun insert-header ()
-  "Insert a // header for the current file"
-  (interactive)
-  (insert (concat
-           "// File: " (file-name-nondirectory (buffer-file-name)) "\n//\n"
-           "// Created: " (format-time-string "%Y-%m-%d") "\n"
-           "// Time-stamp: <>\n"
-           "// Copyright (C) " (substring( current-time-string) -4 )
-           " by " (user-full-name) "\n//\n"
-           "// Author: " (user-full-name) "\n//\n"
-           )))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
