@@ -37,26 +37,10 @@
 ;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 ;; OTHER DEALINGS IN THE SOFTWARE.
 
-;;; Usage:
-;;
-;; Defines a colour scheme resembling that of the original TextMate Twilight colour theme.
-;; To use add the following to your .emacs file (requires the color-theme package):
-;;
-;; (require 'color-theme)
-;; (color-theme-initialize)
-;; (load-file "~/.emacs.d/twilight-emacs/color-theme-twilight.el")
-
-
-;; TODO: Several areas still require improvement such as recognition of code that ruby-mode doesn't
-;; yet pick up (eg. parent classes), Rails/Merb keywords, or non Ruby code related areas
-;; (eg. dired, HTML, etc). Please feel free to customize further and send in any improvements,
-;; patches most welcome.
-;;
-;; Credits due to the excellent TextMate Twilight theme
-;;
-;; Thanks to Travis Jeffery for ido-mode and fixes to the minibuffer-prompt to fit in with the rest of the theme
-
 ;;; Code:
+
+;; requires
+(require 'color-theme)
 
 (defun color-theme-twilight ()
   "TextMate Twilight theme for GNU Emacs."
@@ -115,3 +99,9 @@
 	  (toolbar ((t (nil))))
 	  (underline ((nil (:underline nil))))
 	  (zmacs-region ((t (:background "snow" :foreground "blue")))))))
+
+(add-to-list 'color-themes '(color-theme-twilight
+	                             "Twilight"
+	                             "Mikael Hultgren <blomma@gmail.com"))
+
+(provide 'color-theme-twilight)

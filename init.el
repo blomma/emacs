@@ -2,8 +2,23 @@
 ;;; Set the load path
 ;;;
 
-(add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp"))
-(add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp/themes"))
+(add-to-list 'load-path "~/.emacs.d/lisp")
+(add-to-list 'load-path "~/.emacs.d/lisp/themes")
+
+(defun add-subfolders-to-load-path (parent-dir) ;; from bbatsov
+  "Adds all first level `parent-dir' subdirs to the Emacs load path."
+  (dolist (f (directory-files parent-dir))
+    (let ((name (concat parent-dir "/" f)))
+      (when (and (file-directory-p name)
+                 (not (equal f ".."))
+                 (not (equal f ".")))
+        (add-to-list 'load-path name)))))
+
+(add-subfolders-to-load-path "~/.emacs.d/vendor")
+(add-to-list 'load-path "~/.emacs.d/vendor")
+
+;; Executables might be somewhere else
+(add-to-list 'exec-path "~/Opt/homebrew/bin")
 
 ;;;-----------------------------------------------------------------------------
 ;;; Misc
@@ -13,7 +28,7 @@
 (setq linux(eq system-type 'gnu/linux))
 (setq windows(eq system-type 'windows-nt))
 
-;; Start upp a server under linux
+;; Start upp a server
 (if (not windows)
     (server-start))
 
@@ -23,12 +38,17 @@
 (set-keyboard-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
 
-(when linux
-  (set-default-font "-misc-fixed-medium-r-normal--15-140-75-75-c-90-iso8859-1"))
-
 ;; Mac specifik confs
 (when darwin
-  (set-face-font 'default "Menlo-13")
+  (setq default-input-method "MacOSX")
+
+  (setq
+   mac-option-modifier t
+   mac-allow-anti-aliasing t
+   mac-command-key-is-meta t
+   )
+
+  (set-face-font 'default "Menlo-12")
 
   ;; Set startup frame width
   (setq default-frame-alist
@@ -37,7 +57,6 @@
   (setq browse-url-browser-function 'browse-url-default-macosx-browser
         delete-by-moving-to-trash t)
   )
-
 
 ;;;-----------------------------------------------------------------------------
 ;;; Internal emacs variables
@@ -63,12 +82,7 @@
  '(size-indication-mode t)
  '(tool-bar-mode nil)
  '(tooltip-mode nil)
- '(uniquify-buffer-name-style (quote forward) nil (uniquify))
  '(user-mail-address "Mikael Hultgren <blomma@gmail.com>"))
-
-;; Mouse focus follow
-(setq mouse-autoselect-window t)
-(setq x-mouse-click-focus-ignore-position t)
 
 ;; put as much syntax highlighting into documents as possible
 (setq font-lock-maximum-decoration t)
@@ -96,29 +110,21 @@
 ;; flash instead of that annoying bell
 (setq visible-bell t)
 
-(add-hook 'write-file-hooks 'time-stamp)
-(setq time-stamp-active t)
-(setq time-stamp-format "%:y-%02m-%02d %02H:%02M:%02S")
-
 ;; Set tab length
 (setq default-tab-width 4)
 
 ;; highlight during query
 (setq query-replace-highlight t)
 
-;; Automagically read compressed files
-(auto-compression-mode 1)
-
-;; Access system clipboard
-(setq x-select-enable-clipboard t)
-
-;; Set default spell shecker
-(setq-default ispell-program-name "/Users/blomma/Opt/bin/aspell")
-
 (setq completion-auto-help t)
 (setq completion-auto-exit t)
 (setq inhibit-startup-message t)
-(setq garbage-collection-messages t)
+
+;; Make buffer names unique.
+(require 'uniquify)
+(setq
+ uniquify-buffer-name-style 'reverse
+ uniquify-separator ":")
 
 ;;;---------------------------------------------------------------------
 ;;; Mark handling.  The following two lines makes the highlighted
@@ -127,9 +133,11 @@
 ;;; days!)
 ;;;
 
-(if (boundp 'transient-mark-mode)
-    (setq transient-mark-mode t))
-(setq mark-even-if-inactive t)
+;; Make the region act like common text selection.
+(transient-mark-mode 1)
+
+;; <Enter> should be smart. (DWIM)
+(global-set-key (kbd "RET") 'newline-and-indent)
 
 ;;;---------------------------------------------------------------------
 ;;; Search
@@ -142,6 +150,12 @@
 
 (copy-face 'highlight 'isearch)
 
+;; Display "Don't Panic" in large, friendly, letters
+(setq initial-scratch-message
+      (propertize "Don't\nPanic\n"
+                  'font-lock-face '(:height 10.0 :inherit variable-pitch))
+      inhibit-startup-screen t)
+
 ;;;---------------------------------------------------------------------
 ;;; Autosave and Backup
 ;;;
@@ -150,15 +164,11 @@
 (setq auto-save-visited-file-name nil)
 (setq make-backup-files nil)
 (setq backup-inhibited t)
-(setq backup-by-copying-when-linked t)  ; Preserve links!
+(setq backup-by-copying-when-linked t)
 
 ;;;---------------------------------------------------------------------
 ;;; The mode line and the frame header.
 ;;;
-;;; The following section adds the line number to the mode line, and
-;;; the time and date to the frame header line.  The date is displayed
-;;; in standard european 24 hour format, the format americans tends to
-;;; refer to as "military" time...
 
 (setq display-time-day-and-date t
       display-time-24hr-format t)
@@ -167,76 +177,66 @@
 (column-number-mode t)
 
 ;;;-----------------------------------------------------------------------------
-;;; Javascript mode
-;;;
-
-(defvar esk-js-mode-hook nil)
-(defun run-esk-js-mode-hook ()
-  (run-hooks 'esk-js-mode-hook))
-
-(defmacro esk-configure-javascript (name)
-  (let ((sym (intern name))
-        (mode (intern (concat name "-mode")))
-        (hook (intern (concat name "-mode-hook")))
-        (keymap (intern (concat name "-mode-map")))
-        (indent (intern (concat name "-indent-level"))))
-    `(progn
-       (autoload ',mode ,name ,(concat "Start " name "-mode") t)
-       (add-to-list 'auto-mode-alist '("\\.js$" . ,mode))
-       (add-to-list 'auto-mode-alist '("\\.json$" . ,mode))
-       (add-hook ',hook 'moz-minor-mode)
-       (add-hook ',hook 'esk-paredit-nonlisp)
-       (add-hook ',hook 'run-coding-hook)
-       (add-hook ',hook 'run-esk-js-mode-hook)
-       (setq ,indent 4)
-
-       (eval-after-load ',sym
-         '(progn (define-key ,keymap "{" 'paredit-open-curly)
-                 (define-key ,keymap "}" 'paredit-close-curly-and-newline)
-                 (define-key ,keymap (kbd ",") 'self-insert-command))))))
-
-(defun pretty-functions ()
-  (font-lock-add-keywords
-   nil `(("\\(function *\\)("
-          (0 (progn (compose-region (match-beginning 1)
-                                    (match-end 1) "ƒ")
-                    nil))))))
-(add-hook 'esk-js-mode-hook 'pretty-functions)
-
-(if (< (string-to-number emacs-version) 23.2)
-    (esk-configure-javascript "espresso")
-  (esk-configure-javascript "js"))
-
-;;;-----------------------------------------------------------------------------
 ;;; Markdown mode
 ;;;
 
 (autoload 'markdown-mode "markdown-mode"
   "Major mode for editing Markdown files" t)
+
 (setq auto-mode-alist
       (cons '("\\.md" . markdown-mode) auto-mode-alist))
 
+(setq markdown-command "multimarkdown")
+
 ;;;-----------------------------------------------------------------------------
-;;; Smarttab mode
+;;; Javascript beautify
 ;;;
 
-(require 'smart-tab)
-(global-smart-tab-mode 1)
+(require 'js-beautify)
 
-(define-key read-expression-map [(tab)] 'hippie-expand)
+;;;-----------------------------------------------------------------------------
+;;; Autocomplete
+;;;
 
-(defun hippie-unexpand ()
-  (interactive)
-  (hippie-expand 0))
+(require 'auto-complete-config)
 
-(define-key read-expression-map [(shift tab)] 'hippie-unexpand)
+; Make sure we can find the dictionaries
+(add-to-list 'ac-dictionary-directories
+             "~/.emacs.d/vendor/auto-complete.el/dict")
+
+(ac-config-default)
+
+(global-auto-complete-mode t)
+
+; Start auto-completion after 2 characters of a word
+(setq ac-auto-start 2)
+
+; case sensitivity is important when finding matches
+(setq ac-ignore-case nil)
+
+;;;-----------------------------------------------------------------------------
+;;; Yasnippets
+;;;
+
+(require 'yasnippet)
+(yas/initialize)
+(setq yas/root-directory '("~/.emacs.d/snippets"
+                           "~/.emacs.d/vendor/yasnippet.el/snippets"))
+(mapc 'yas/load-directory yas/root-directory)
+
+;; (add-to-list 'ac-sources 'ac-source-yasnippet)
+
+;;;-----------------------------------------------------------------------------
+;;; Flymake mode
+;;;
+
+(require 'flymake-cursor)
 
 ;;;-----------------------------------------------------------------------------
 ;;; Whitespace mode
 ;;;
 
-(require 'ethan-wspace)
-(global-ethan-wspace-mode 1)
+(add-hook 'before-save-hook 'whitespace-cleanup)
 
 ;;;-----------------------------------------------------------------------------
 ;;; Textmate mode
@@ -249,37 +249,8 @@
 ;;; Highligth parenteses
 ;;;
 
-(require 'mic-paren) ; loading
-(paren-activate)     ; activating
-
-;;;-----------------------------------------------------------------------------
-;;; VB.net mode
-;;;
-
-(autoload 'vbnet-mode "vbnet-mode" "Mode for editing VB.NET code." t)
-(setq auto-mode-alist (append '(("\\.\\(frm\\|bas\\|cls\\|vb\\)$" .
-                                 vbnet-mode)) auto-mode-alist))
-
-(defun my-vbnet-mode-fn ()
-  "My hook for VB.NET mode"
-  (interactive)
-  ;; This is an example only.
-  ;; These statements are not required to use VB.NET, but
-  ;; you might like them.
-  (turn-on-font-lock)
-  (turn-on-auto-revert-mode)
-  (setq indent-tabs-mode nil)
-  )
-
-(add-hook 'vbnet-mode-hook 'my-vbnet-mode-fn)
-
-;;;-----------------------------------------------------------------------------
-;;; Lua mode
-;;;
-
-(autoload 'lua-mode "lua-mode" "Lua editing mode." t)
-(add-to-list 'auto-mode-alist '("\\.lua$" . lua-mode))
-(add-to-list 'interpreter-mode-alist '("lua" . lua-mode))
+(require 'mic-paren)
+(paren-activate)
 
 ;;;-----------------------------------------------------------------------------
 ;;; Lisp modes
@@ -315,17 +286,6 @@
 (add-hook 'common-lisp-mode-hook      (paren-face-add-support lisp-font-lock-keywords-2))
 
 ;;;-----------------------------------------------------------------------------
-;;; css mode
-;;;
-
-(autoload 'css-mode "css-mode")
-(setq auto-mode-alist
-      (cons '("\\.css\\'" . css-mode) auto-mode-alist))
-
-(setq cssm-indent-function #'cssm-c-style-indenter)
-(setq cssm-indent-level 4)
-
-;;;-----------------------------------------------------------------------------
 ;;; Filladapt
 ;;;
 
@@ -337,48 +297,44 @@
 
 (require 'ido)
 (ido-mode t)
+
+(defun my-ido-ignore-buffers (name)
+  (with-current-buffer name
+    (string-match "-template-indent-buffer$" name)))
+
+(setq ido-ignore-buffers '(my-ido-ignore-buffers))
+
+;; fuzzy matching is a must have, says rmm5t
 (setq ido-enable-flex-matching t)
+
+;; Get rid of the annoying .ido.last file
+;; (http://stackoverflow.com/questions/1371076)
+(setq
+ ido-enable-last-directory-history nil
+ ido-record-commands nil
+ ido-max-work-directory-list 0
+ ido-max-work-file-list 0)
+
+(global-set-key (kbd "C-;") 'ido-switch-buffer)
+
+;; Display IDO results vertically, rather than horizontally
+;; (from timcharper, jpkotta via EmacsWiki)
+(setq ido-decorations
+      (quote ("\n-> " "" "\n   " "\n   ..." "[" "]"
+              " [No match]" " [Matched]" " [Not readable]"
+              " [Too big]" " [Confirm]")))
+
+(defun ido-disable-line-trucation ()
+  (set (make-local-variable 'truncate-lines) nil))
+
+(add-hook 'ido-minibuffer-setup-hook 'ido-disable-line-trucation)
 
 ;;;----------------------------------------------------------------------
 ;;;  Color Theme
 ;;;
 
-(require 'color-theme)
-(color-theme-initialize)
-(load-file "~/.emacs.d/lisp/themes/color-theme-twilight.el")
+(require 'color-theme-twilight)
 (color-theme-twilight)
-
-;;;-----------------------------------------------------------------------------
-;;; CPerl mode
-;;;
-
-(autoload 'perl-mode "cperl-mode" "alternate mode for editing Perl programs" t)
-(setq cperl-hairy t)
-(setq cperl-tab-always-indent t)
-(setq cperl-indent-left-aligned-comments t)
-(setq cperl-use-syntax-table-text-property t)
-(setq cperl-pod-here-scan t)
-(setq cperl-electric-keywords 'null)
-(setq cperl-indent-level 4)
-(setq cperl-brace-offset -4)
-(setq cperl-continued-brace-offset 0)
-(setq cperl-label-offset -4)
-(setq cperl-continued-statement-offset 4)
-(setq cperl-merge-trailing-else nil)
-(setq cperl-extra-newline-before-brace t)
-(setq cperl-brace-imaginary-offset 0)
-(setq cperl-close-paren-offset -4)
-(setq cperl-continued-brace-offset 0)
-(setq cperl-highlight-variables-indiscriminately nil)
-(setq cperl-indent-parens-as-block t)
-(setq cperl-invalid-face nil)
-(setq cperl-under-as-char t)
-
-(setq auto-mode-alist
-      (append '(("\\.\\([pP][Llm]\\|al\\)$" . perl-mode))  auto-mode-alist ))
-
-(setq auto-mode-alist (append (list (cons "\\.cgi\\'" 'perl-mode))
-                              auto-mode-alist))
 
 ;;;----------------------------------------------------------------------
 ;;;  C/C++ mode
@@ -421,9 +377,6 @@
   (setq filladapt-mode 1)
   (setq indent-tabs-mode t)
 
-  ;; we like hungry-delete
-  ;;(c-toggle-hungry-state 1)
-
   ;; keybindings for all supported languages.  We can put these in
   ;; c-mode-base-map because c-mode-map, c++-mode-map, objc-mode-map,
   ;; java-mode-map, idl-mode-map, and pike-mode-map inherit from it.
@@ -432,49 +385,6 @@
   )
 
 (add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
-
-;;;----------------------------------------------------------------------
-;;; C# Mode support
-;;;
-
-(autoload 'csharp-mode "csharp-mode")
-
-(c-add-style "myC#Style"
-             '(
-               (c-basic-offset . 4)
-               (c-comment-only-line-offset . 0)
-               (c-hanging-braces-alist . (
-                                          (substatement-open before after)
-                                          (brace-list-open before after)
-                                          (defun-open)
-                                          (defun-close)
-                                          ))
-
-               (c-offsets-alist . (
-                                   (topmost-intro        . 0)
-                                   (topmost-intro-cont   . *)
-                                   (substatement         . +)
-                                   (substatement-open    . 0)
-                                   (case-label           . +)
-                                   (access-label         . 0)
-                                   (inclass              . +)
-                                   (inline-open          . 0)
-                                   (arglist-close        . 0)
-                                   (innamespace          . +)
-                                   ))
-               ))
-
-(defun my-csharp-mode-hook ()
-  (cond (window-system
-         (turn-on-font-lock)
-         (c-set-style "myC#Style")
-         )))
-
-(add-hook 'csharp-mode-hook 'my-csharp-mode-hook)
-(setq auto-mode-alist
-      (append '(
-                ("\\.cs$" . csharp-mode)
-                ) auto-mode-alist ))
 
 ;;;-----------------------------------------------------------------------------
 ;;; Key bindings
@@ -487,16 +397,13 @@
 (global-set-key [f5] 'bury-buffer)
 (global-set-key [(shift f5)] 'list-colors-display)
 (global-set-key [f7] 'imenu)
-(global-set-key [(shift f7)] 'insert-perl-die)
-(global-set-key [f8] 'run-perl)
-(global-set-key [(shift f8)] 'debug-perl)
 (global-set-key [f9] 'split-window-vertically)
 (global-set-key [f11] 'query-replace)
 
 ;; Goto a specific line is really needed!
-(global-set-key "\C-l" 'goto-line)
+;; (global-set-key "\C-l" 'goto-line)
 
-(global-set-key "\C-xs" 'save-buffer)
+;; (global-set-key "\C-xs" 'save-buffer)
 
 ;; Revert buffer
 (global-set-key [(control c) r] 'revert-buffer)
@@ -516,8 +423,8 @@
 ;; widescreen, no line-wrap
 (defun write-code ()
   (interactive)
-  ;;(set-frame-width nil 320)
-  (set-frame-height nil 95)
+  (set-frame-width nil 150)
+  (set-frame-height nil 40)
   (global-visual-line-mode 0)
   (show-paren-mode)
   (setq mode-line-format
@@ -572,43 +479,11 @@ print a message in the minibuffer with the result."
   (pop-to-buffer "*Fortune*")
   (insert (shell-command-to-string "/Users/blomma/Opt/homebrew/bin/fortune")))
 
-;; This method, when bound to C-x C-c, allows you to close an emacs frame the
-;; same way, whether it's the sole window you have open, or whether it's
-;; a "child" frame of a "parent" frame.  If you're like me, and use emacs in
-;; a windowing environment, you probably have lots of frames open at any given
-;; time.  Well, it's a pain to remember to do Ctrl-x 5 0 to dispose of a child
-;; frame, and to remember to do C-x C-x to close the main frame (and if you're
-;; not careful, doing so will take all the child frames away with it).  This
-;; is my solution to that: an intelligent close-frame operation that works in
-;; all cases (even in an emacs -nw session).
-(defun intelligent-close ()
-  "quit a frame the same way no matter what kind of frame you are on"
-  (interactive)
-  (if (eq (car (visible-frame-list)) (selected-frame))
-      ;;for parent/master frame...
-      (if (> (length (visible-frame-list)) 1)
-          ;;close a parent with children present
-          (delete-frame (selected-frame))
-        ;;close a parent with no children present
-        (save-buffers-kill-emacs))
-    ;;close a child frame
-    (delete-frame (selected-frame))))
-
 ;;compute the length of the marked region
 (defun region-length ()
   "length of a region"
   (interactive)
   (message (format "%d" (- (region-end) (region-beginning)))))
-
-;; Kill other window and and enlarge current buffer
-(defun kill-buffer-other-window (arg)
-  "Kill the buffer in the other window, and make the current buffer full size. If no other window, kills current buffer."
-  (interactive "p")
-  (let ((buf (save-window-excursion
-               (other-window arg)
-               (current-buffer))))
-    (delete-windows-on buf)
-    (kill-buffer buf)))
 
 ;; Insert // header
 (defun insert-header ()
@@ -622,9 +497,44 @@ print a message in the minibuffer with the result."
            " by " (user-full-name) "\n//\n"
            "// Author: " (user-full-name) "\n//\n"
            )))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+;; --------------------------------------------------------
+;; nice little alternative visual bell; Miles Bader <miles /at/ gnu.org>
+(defcustom echo-area-bell-string "*DING* " ;"♪"
+  "Message displayed in mode-line by `echo-area-bell' function."
+  :group 'user)
+(defcustom echo-area-bell-delay 0.1
+  "Number of seconds `echo-area-bell' displays its message."
+  :group 'user)
+;; internal variables
+(defvar echo-area-bell-cached-string nil)
+(defvar echo-area-bell-propertized-string nil)
+(defun echo-area-bell ()
+  "Briefly display a highlighted message in the echo-area.
+    The string displayed is the value of `echo-area-bell-string',
+    with a red background; the background highlighting extends to the
+    right margin.  The string is displayed for `echo-area-bell-delay'
+    seconds.
+    This function is intended to be used as a value of `ring-bell-function'."
+  (unless (equal echo-area-bell-string echo-area-bell-cached-string)
+    (setq echo-area-bell-propertized-string
+          (propertize
+           (concat
+            (propertize
+             "x"
+             'display
+             `(space :align-to (- right ,(+ 2 (length echo-area-bell-string)))))
+            echo-area-bell-string)
+           'face '(:background "red")))
+    (setq echo-area-bell-cached-string echo-area-bell-string))
+  (message echo-area-bell-propertized-string)
+  (sit-for echo-area-bell-delay)
+  (message ""))
+(setq ring-bell-function 'echo-area-bell)
