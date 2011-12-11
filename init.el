@@ -137,6 +137,25 @@
                   'font-lock-face '(:height 10.0 :inherit variable-pitch))
       inhibit-startup-screen t)
 
+
+;;;---------------------------------------------------------------------
+;;; Deft
+;;;
+
+(require 'deft)
+
+(setq deft-extension "txt")
+(setq deft-directory "~/Dropbox/Bucket/Notes")
+(setq deft-text-mode 'markdown-mode)
+(setq deft-use-filename-as-title t)
+
+;;;---------------------------------------------------------------------
+;;; Auto pair
+;;;
+
+(require 'autopair)
+(autopair-global-mode)
+
 ;;;---------------------------------------------------------------------
 ;;; Save place
 ;;;
@@ -505,6 +524,8 @@
 (global-set-key [f7] 'imenu)
 (global-set-key [f9] 'split-window-vertically)
 (global-set-key [f11] 'query-replace)
+
+(global-set-key [f8] 'deft)
 
 ;; Revert buffer
 (global-set-key [(control c) r] 'revert-buffer)
