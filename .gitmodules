@@ -1,0 +1,15 @@
+[submodule "vendor/textmate.el"]
+	path = vendor/textmate.el
+	url = git://github.com/defunkt/textmate.el.git
+[submodule "vendor/auto-complete.el"]
+	path = vendor/auto-complete.el
+	url = git://github.com/m2ym/auto-complete.git
+[submodule "vendor/deft.el"]
+	path = vendor/deft.el
+	url = git://jblevins.org/git/deft.git
+[submodule "vendor/markdown-mode.el"]
+	path = vendor/markdown-mode.el
+	url = git://jblevins.org/git/markdown-mode.git
+[submodule "vendor/yasnippet.el"]
+	path = vendor/yasnippet.el
+	url = git://github.com/capitaomorte/yasnippet.git
