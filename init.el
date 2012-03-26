@@ -154,6 +154,7 @@
 ;;;
 
 (require 'autopair)
+
 (autopair-global-mode)
 
 ;;;---------------------------------------------------------------------
@@ -161,6 +162,7 @@
 ;;;
 
 (require 'saveplace)
+
 (setq-default save-place t)
 
 ;;;---------------------------------------------------------------------
@@ -168,6 +170,7 @@
 ;;;
 
 (require 'uniquify)
+
 (setq
  uniquify-buffer-name-style 'reverse
  uniquify-separator ":"
@@ -320,6 +323,7 @@
 ;;;
 
 (require 'yasnippet)
+
 (yas/initialize)
 (setq yas/root-directory
       '("~/.emacs.d/snippets"
@@ -402,6 +406,7 @@
 ;;;
 
 (require 'ido)
+
 (ido-mode 'both)
 
 ;; fuzzy matching is a must have, says rmm5t
@@ -459,6 +464,7 @@
 ;;;
 
 (require 'color-theme-twilight)
+
 (color-theme-twilight)
 
 ;;;----------------------------------------------------------------------
