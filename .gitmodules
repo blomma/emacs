@@ -13,3 +13,12 @@
 [submodule "vendor/yasnippet.el"]
 	path = vendor/yasnippet.el
 	url = git://github.com/capitaomorte/yasnippet.git
+[submodule "vendor/popup.el"]
+	path = vendor/popup.el
+	url = git://github.com/m2ym/popup-el.git
+[submodule "theme/zenburn-emacs.el"]
+	path = theme/zenburn-emacs.el
+	url = git://github.com/bbatsov/zenburn-emacs.git
+[submodule "theme/twilight-emacs.el"]
+	path = theme/twilight-emacs.el
+	url = git://github.com/blomma/twilight-emacs.el.git
