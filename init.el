@@ -2,10 +2,7 @@
 ;;; Set the load path
 ;;;
 
-(add-to-list 'load-path "~/.emacs.d/lisp")
-(add-to-list 'load-path "~/.emacs.d/lisp/themes")
-
-(defun add-subfolders-to-load-path (parent-dir) ;; from bbatsov
+(defun add-subfolders-to-load-path (parent-dir)
   "Adds all first level `parent-dir' subdirs to the Emacs load path."
   (dolist (f (directory-files parent-dir))
     (let ((name (concat parent-dir "/" f)))
@@ -14,8 +11,20 @@
                  (not (equal f ".")))
         (add-to-list 'load-path name)))))
 
-(add-subfolders-to-load-path "~/.emacs.d/vendor")
-(add-to-list 'load-path "~/.emacs.d/vendor")
+        (add-subfolders-to-load-path "~/.emacs.d/vendor")
+
+        (defun add-subfolders-to-theme-load-path (parent-dir)
+          "Adds all first level `parent-dir' subdirs to the Emacs theme load path."
+          (dolist (f (directory-files parent-dir))
+            (let ((name (concat parent-dir "/" f)))
+              (when (and (file-directory-p name)
+                         (not (equal f ".."))
+                         (not (equal f ".")))
+                (add-to-list 'custom-theme-load-path name)))))
+
+(add-subfolders-to-theme-load-path "~/.emacs.d/theme")
+
+(add-to-list 'load-path "~/.emacs.d/lisp")
 
 ;; Executables might be somewhere else
 (add-to-list 'exec-path "~/Opt/homebrew/bin")
@@ -52,7 +61,7 @@
    mac-command-key-is-meta t
    )
 
-  (set-face-font 'default "Menlo-12")
+  (set-face-font 'default "Menlo-14")
 
   ;; Set startup frame width
   (setq default-frame-alist
@@ -137,6 +146,28 @@
                   'font-lock-face '(:height 10.0 :inherit variable-pitch))
       inhibit-startup-screen t)
 
+
+;;;---------------------------------------------------------------------
+;;; Rainbow delimiters
+;;;
+
+(require 'rainbow-delimiters)
+
+(global-rainbow-delimiters-mode)
+
+;;;---------------------------------------------------------------------
+;;; Taskpaper
+;;;
+
+(require 'taskpaper)
+
+(setq taskpaper-dir (expand-file-name "~/Dropbox/Bucket/"))
+
+(defun taskpaper ()
+  (interactive)
+  (let ((filename (concat taskpaper-dir
+                          (format-time-string "%Y-%m-%d.taskpaper"))))
+    (find-file-other-frame filename)))
 
 ;;;---------------------------------------------------------------------
 ;;; Deft
@@ -294,12 +325,6 @@
 (setq markdown-command "multimarkdown")
 
 ;;;-----------------------------------------------------------------------------
-;;; Javascript beautify
-;;;
-
-(require 'js-beautify)
-
-;;;-----------------------------------------------------------------------------
 ;;; Autocomplete
 ;;;
 
@@ -335,12 +360,6 @@
       '(yas/x-prompt yas/ido-prompt))
 (yas/global-mode 1)
 (add-to-list 'auto-mode-alist '("yas/.*" . snippet-mode))
-
-;;;-----------------------------------------------------------------------------
-;;; Flymake mode
-;;;
-
-(require 'flymake-cursor)
 
 ;;;-----------------------------------------------------------------------------
 ;;; Whitespace mode
@@ -394,12 +413,6 @@
 (add-hook 'emacs-lisp-mode-hook       (paren-face-add-support lisp-font-lock-keywords-2))
 (add-hook 'lisp-interaction-mode-hook (paren-face-add-support lisp-font-lock-keywords-2))
 (add-hook 'common-lisp-mode-hook      (paren-face-add-support lisp-font-lock-keywords-2))
-
-;;;-----------------------------------------------------------------------------
-;;; Filladapt
-;;;
-
-(require 'filladapt)
 
 ;;;-----------------------------------------------------------------------------
 ;;; Buffer switching
@@ -460,14 +473,6 @@
              (setq resize-minibuffer-window-max-height 1))))
 
 ;;;----------------------------------------------------------------------
-;;;  Color Theme
-;;;
-
-(require 'color-theme-twilight)
-
-(color-theme-twilight)
-
-;;;----------------------------------------------------------------------
 ;;;  C/C++ mode
 ;;;
 
@@ -502,11 +507,6 @@
   ;; Define some stuff to font lock
   (font-lock-add-keywords 'c-mode '(("\\<FIXME:" 0 font-lock-warning-face t)))
   (font-lock-add-keywords 'c++-mode '(("\\<FIXME:" 0 font-lock-warning-face t)))
-
-  ;; Turn on filladapt
-  (c-setup-filladapt)
-  (setq filladapt-mode 1)
-  (setq indent-tabs-mode t)
 
   ;; keybindings for all supported languages.  We can put these in
   ;; c-mode-base-map because c-mode-map, c++-mode-map, objc-mode-map,
@@ -652,3 +652,16 @@ print a message in the minibuffer with the result."
   (sit-for echo-area-bell-delay)
   (message ""))
 (setq ring-bell-function 'echo-area-bell)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ansi-color-names-vector ["#3f3f3f" "#cc9393" "#7f9f7f" "#f0dfaf" "#8cd0d3" "#dc8cc3" "#93e0e3" "#dcdccc"])
+ '(background-color "#042028")
+ '(background-mode dark)
+ '(cursor-color "#708183")
+ '(custom-enabled-themes (quote (twilight)))
+ '(custom-safe-themes (quote ("f2de89c68dd88605a1a22467c77375b4f3b9530d6d866b1b2f1b05378a20242c" "c2e946f6382ad9476ed8f45a2971f46d1f291e10747090ee8cbe6537e0a34347" "da93340745b198a67a0daa41d72ec713c893e7cef9b8fe2d00f346d5755d3f37" "ecb58d3d27238e077bc48e013c9f5f09e2cab5442863339eb0c6ada97767bab7" "69a85c90b5ed858ccbb4426e836b522fc6c9ec99415a41e402fa059e5ddb2efd" "3602d01868d70a6ee600bb7d2cde42f9dba207d2ea77ed48409cc1bf27f3b860" "1e7e097ec8cb1f8c3a912d7e1e0331caeed49fef6cff220be63bd2a6ba4cc365" "fc5fcb6f1f1c1bc01305694c59a1a861b008c534cae8d0e48e4d5e81ad718bc6" "870bd363bb2770316775ffa6e5938d73bee3adaba1f4d5b7b129533b3e0fed41" "0c8ffb272e65e2ffc49b0d5755d7db137931c5e3ed47890d7a6de07717eaa2e8" "7511ae742ae5e87bc096db346ab4694c1042a4a6035d7d15f4b86b4f2213c8d8" "b70e5b325e9c1b5672675343b35407a3d64b055b6fca5846f55232127693cb2c" "3f43263bd8540fcba50c16b0e21f788a4a73fb06cbfc8fb61afeab625ff61ec2" "edb0e9dce76acf08243762d30683293812c838773f0e9f41b7e6baf904776d6c" default)))
+ '(fci-rule-color "#383838")
+ '(foreground-color "#708183"))

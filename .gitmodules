@@ -22,3 +22,9 @@
 [submodule "theme/twilight-emacs.el"]
 	path = theme/twilight-emacs.el
 	url = git://github.com/blomma/twilight-emacs.el.git
+[submodule "vendor/taskpaper.el"]
+	path = vendor/taskpaper.el
+	url = git://github.com/tedroden/taskpaper-el.git
+[submodule "vendor/rainbow-delimiters.el"]
+	path = vendor/rainbow-delimiters.el
+	url = git://github.com/jlr/rainbow-delimiters.git
