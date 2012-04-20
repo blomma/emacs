@@ -92,8 +92,7 @@
 (setq scroll-step 1)
 
 ;; format the title-bar to always include the buffer name
-(setq-default frame-title-format (list "Emacs: %f"))
-(setq-default icon-title-format "Emacs - %b")
+;; (setq-default icon-title-format "Emacs - %b")
 
 ;; Make all "yes or no" prompts show "y or n" instead
 (fset 'yes-or-no-p 'y-or-n-p)
