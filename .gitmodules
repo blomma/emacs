@@ -28,3 +28,6 @@
 [submodule "vendor/rainbow-delimiters.el"]
 	path = vendor/rainbow-delimiters.el
 	url = git://github.com/jlr/rainbow-delimiters.git
+[submodule "vendor/autopair.el"]
+	path = vendor/autopair.el
+	url = https://github.com/capitaomorte/autopair.git
