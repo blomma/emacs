@@ -10,9 +10,6 @@
 [submodule "vendor/yasnippet.el"]
 	path = vendor/yasnippet.el
 	url = git://github.com/capitaomorte/yasnippet.git
-[submodule "vendor/popup.el"]
-	path = vendor/popup.el
-	url = git://github.com/m2ym/popup-el.git
 [submodule "vendor/taskpaper.el"]
 	path = vendor/taskpaper.el
 	url = git://github.com/tedroden/taskpaper-el.git
