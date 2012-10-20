@@ -1,0 +1,30 @@
+[submodule "vendor/textmate.el"]
+	path = vendor/textmate.el
+	url = git://github.com/defunkt/textmate.el.git
+[submodule "vendor/auto-complete.el"]
+	path = vendor/auto-complete.el
+	url = https://github.com/auto-complete/auto-complete
+[submodule "vendor/deft.el"]
+	path = vendor/deft.el
+	url = git://jblevins.org/git/deft.git
+[submodule "vendor/markdown-mode.el"]
+	path = vendor/markdown-mode.el
+	url = git://jblevins.org/git/markdown-mode.git
+[submodule "vendor/yasnippet.el"]
+	path = vendor/yasnippet.el
+	url = git://github.com/capitaomorte/yasnippet.git
+[submodule "vendor/popup.el"]
+	path = vendor/popup.el
+	url = git://github.com/m2ym/popup-el.git
+[submodule "vendor/taskpaper.el"]
+	path = vendor/taskpaper.el
+	url = git://github.com/tedroden/taskpaper-el.git
+[submodule "vendor/rainbow-delimiters.el"]
+	path = vendor/rainbow-delimiters.el
+	url = git://github.com/jlr/rainbow-delimiters.git
+[submodule "vendor/autopair.el"]
+	path = vendor/autopair.el
+	url = https://github.com/capitaomorte/autopair.git
+[submodule "auto-complete.el"]
+	path = auto-complete.el
+	url = https://github.com/auto-complete/auto-complete
